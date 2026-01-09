@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --background-subtle: 45 30% 96%;
+    --foreground: 0 0% 8%;
+    --foreground-muted: 0 0% 40%;
+    --accent: 12 80% 50%;
+    --accent-foreground: 0 0% 100%;
+    --cream: 45 40% 94%;
+    --olive: 75 25% 35%;
+    --terracotta: 15 65% 55%;
+    --border: 40 20% 88%;
+    --ring: 12 80% 50%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Film grain texture */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-blend-mode: overlay;
+    background-size: 150px;
+  }
+}
+
+@layer components {
+  /* Editorial serif headings */
+  .font-editorial {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+  }
+
+  /* Hand-drawn underline effect */
+  .squiggle {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12'%3E%3Cpath d='M0 8 Q 12.5 2, 25 8 T 50 8 T 75 8 T 100 8' stroke='%23D85A4A' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: bottom;
+    background-size: 50px 8px;
+    padding-bottom: 8px;
+  }
+
+  /* Blob/organic shapes */
+  .blob {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+
+  .blob-2 {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  }
+
+  /* Torn paper edge */
+  .torn-edge {
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 10' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,10 L0,2 Q5,4 10,2 T20,2 T30,2 T40,2 T50,2 T60,2 T70,2 T80,2 T90,2 T100,2 L100,10 Z' fill='black'/%3E%3C/svg%3E");
+    mask-size: 100% 20px;
+    mask-repeat: no-repeat;
+    mask-position: bottom;
+  }
+
+  /* Marker highlight */
+  .marker {
+    background: linear-gradient(180deg, transparent 50%, rgba(255, 200, 100, 0.4) 50%);
+  }
+
+  /* Rotating text on hover */
+  .tilt-hover {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .tilt-hover:hover {
+    transform: rotate(-2deg) scale(1.02);
+  }
+
+  /* Sticker effect */
+  .sticker {
+    box-shadow: 
+      2px 2px 0 0 hsl(var(--foreground)),
+      4px 4px 0 0 hsl(var(--foreground));
+    transition: all 0.2s ease;
+  }
+  .sticker:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 
+      4px 4px 0 0 hsl(var(--foreground)),
+      6px 6px 0 0 hsl(var(--foreground));
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Offset grid utility */
+  .offset-up {
+    margin-top: -4rem;
+  }
+
+  .offset-left {
+    margin-left: -2rem;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Brutalist border */
+  .border-brutal {
+    border: 3px solid hsl(var(--foreground));
+  }
+
+  /* Skewed background */
+  .skew-bg {
+    transform: skewY(-3deg);
+  }
+
+  .skew-bg > * {
+    transform: skewY(3deg);
+  }
+
+  /* Noise overlay */
+  .noise {
+    position: relative;
+  }
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+  }
+
+  /* Handwritten rotation */
+  .rotate-slight {
+    transform: rotate(-1.5deg);
+  }
+
+  .rotate-slight-right {
+    transform: rotate(1.5deg);
+  }
+}
+
+/* Selection styling - more playful */
+::selection {
+  background: hsl(45 100% 70% / 0.6);
+  color: hsl(var(--foreground));
+}
+
+/* Focus visible styling */
+:focus-visible {
+  @apply outline-none ring-2 ring-accent ring-offset-4 ring-offset-background;
+}
+
+/* Custom cursor on interactive elements */
+a, button {
+  @apply transition-all duration-200;
+}
+
+/* Horizontal scroll snap */
+.snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Prevent text selection during scrolling */
+  body {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Safe area padding for notched devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Smooth scrolling for iOS */
+@supports (-webkit-touch-callout: none) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+}
