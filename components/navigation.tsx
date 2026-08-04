@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLenis, useSmoothScrollTo } from "@/components/providers/smooth-scroll";
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -16,35 +17,75 @@ const navLinks = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const lenis = useLenis();
+  const scrollTo = useSmoothScrollTo();
 
   useEffect(() => {
+    // Passive + rAF-coalesced: never blocks the scroll thread.
+    let frame = 0;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        setIsScrolled(window.scrollY > 50);
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
+  // Lock scrolling behind the mobile menu. Lenis owns the scroll, so stop it
+  // rather than fighting over document.body.style.overflow.
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
+    if (!isOpen) return;
+
+    lenis?.stop();
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsOpen(false);
     };
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      lenis?.start();
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen, lenis]);
+
+  // Move focus into the menu when it opens, and back to the trigger on close.
+  // Skips the initial mount so we never steal focus on page load.
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    if (isOpen) {
+      closeButtonRef.current?.focus();
+    } else {
+      menuButtonRef.current?.focus({ preventScroll: true });
+    }
   }, [isOpen]);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    setIsOpen(false);
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const handleNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault();
+      setIsOpen(false);
+      scrollTo(href);
+    },
+    [scrollTo]
+  );
 
   return (
     <>
@@ -72,9 +113,10 @@ export function Navigation() {
                 className="relative h-20 w-36 sm:h-24 sm:w-44 md:h-32 md:w-60"
               >
                 <Image
-                  src="/g2m-logo.svg"
+                  src="/g2m-logo.png"
                   alt="G2M Church"
                   fill
+                  sizes="(max-width: 640px) 144px, (max-width: 768px) 176px, 240px"
                   className={cn(
                     "object-contain transition-all duration-300",
                     isScrolled && "invert"
@@ -99,8 +141,8 @@ export function Navigation() {
                     whileTap={{ scale: 0.95 }}
                     className={cn(
                       "px-4 py-2 text-sm font-medium transition-colors rounded-full",
-                      isScrolled 
-                        ? "text-foreground-muted hover:text-foreground hover:bg-white" 
+                      isScrolled
+                        ? "text-foreground-muted hover:text-foreground hover:bg-white"
                         : "text-white/80 hover:text-white hover:bg-white/20"
                     )}
                   >
@@ -108,7 +150,7 @@ export function Navigation() {
                   </motion.a>
                 ))}
               </div>
-              
+
               <motion.a
                 href="#visit"
                 onClick={(e) => handleNavClick(e, "#visit")}
@@ -116,8 +158,8 @@ export function Navigation() {
                 whileTap={{ scale: 0.95 }}
                 className={cn(
                   "ml-4 px-5 py-2.5 text-sm font-medium transition-colors duration-300",
-                  isScrolled 
-                    ? "bg-foreground text-white" 
+                  isScrolled
+                    ? "bg-foreground text-white"
                     : "bg-white text-foreground"
                 )}
               >
@@ -127,16 +169,20 @@ export function Navigation() {
 
             {/* Mobile Menu Button */}
             <motion.button
+              ref={menuButtonRef}
+              type="button"
               onClick={() => setIsOpen(true)}
               whileHover={{ rotate: 90 }}
               transition={{ duration: 0.2 }}
               className={cn(
                 "md:hidden w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-colors rounded-lg",
-                isScrolled 
-                  ? "text-foreground bg-foreground/5" 
+                isScrolled
+                  ? "text-foreground bg-foreground/5"
                   : "text-white bg-white/10"
               )}
               aria-label="Open menu"
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
             >
               <Menu className="h-5 w-5" />
             </motion.button>
@@ -148,6 +194,10 @@ export function Navigation() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -167,13 +217,16 @@ export function Navigation() {
               <div className="flex items-center justify-between p-4 sm:p-6">
                 <div className="relative h-14 w-32 sm:h-16 sm:w-36">
                   <Image
-                    src="/g2m-logo.svg"
+                    src="/g2m-logo.png"
                     alt="G2M Church"
                     fill
+                    sizes="(max-width: 640px) 128px, 144px"
                     className="object-contain invert"
                   />
                 </div>
                 <motion.button
+                  ref={closeButtonRef}
+                  type="button"
                   onClick={() => setIsOpen(false)}
                   whileHover={{ rotate: 90 }}
                   className="w-12 h-12 bg-foreground text-white flex items-center justify-center"

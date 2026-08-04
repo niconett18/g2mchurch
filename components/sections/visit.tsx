@@ -50,7 +50,7 @@ export function Visit() {
             You&apos;re invited
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-foreground">
-            Come <span className="font-editorial">hang</span> with us
+            Come <span className="font-editorial">worship</span> with us
           </h2>
         </motion.div>
 
@@ -120,28 +120,19 @@ export function Visit() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="lg:col-span-5 relative lg:rotate-[3deg]"
           >
-            <a 
-              href="https://www.google.com/maps/place/G2M+(Gospel+Generation+Ministry)/@-6.1901145,106.7519582,17z/data=!3m1!4b1!4m6!3m5!1s0x2e69f71c7d36d1c3:0x1af44b2b6903948a!8m2!3d-6.1901145!4d106.7519582!16s%2Fg%2F11b7v6vq31"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block bg-white p-2 shadow-2xl h-full cursor-pointer"
-            >
-              <div 
-                className="h-full min-h-[280px] sm:min-h-[350px] md:min-h-[400px] bg-cover bg-center grayscale hover:grayscale-0 transition-all duration-500 relative"
-                style={{ backgroundImage: `url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')` }}
-              >
-                {/* Pin */}
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full"
-                >
-                  <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center shadow-lg">
-                    <MapPin className="w-5 h-5 text-white" />
-                  </div>
-                </motion.div>
+            <div className="bg-white p-2 shadow-2xl h-full">
+              <div className="h-full min-h-[280px] sm:min-h-[350px] md:min-h-[400px] relative overflow-hidden">
+                {/* Real Google Map. Lazy-loaded so it costs nothing until it
+                    scrolls near, and it renders its own marker for the church. */}
+                <iframe
+                  title="G2M Church location on Google Maps"
+                  src="https://maps.google.com/maps?q=G2M%20(Gospel%20Generation%20Ministry)%2C%20Kencana%20Utama%20III%20M8%20No.32%20C%2C%20Kembangan%2C%20Jakarta%20Barat&z=17&hl=en&output=embed"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="map-embed absolute inset-0 w-full h-full border-0"
+                />
               </div>
-            </a>
+            </div>
             {/* Handwritten label */}
             <motion.div
               initial={{ opacity: 0, rotate: 8 }}
@@ -174,7 +165,11 @@ export function Visit() {
                 transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
               >
                 <button
+                  type="button"
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  aria-expanded={openFaq === index}
+                  aria-controls={`faq-panel-${index}`}
+                  id={`faq-trigger-${index}`}
                   className={`w-full p-4 sm:p-6 text-left flex items-center justify-between group transition-colors ${
                     openFaq === index ? 'bg-foreground text-white' : 'bg-white hover:bg-foreground/5'
                   }`}
@@ -189,6 +184,9 @@ export function Visit() {
                 <AnimatePresence>
                   {openFaq === index && (
                     <motion.div
+                      id={`faq-panel-${index}`}
+                      role="region"
+                      aria-labelledby={`faq-trigger-${index}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}

@@ -1,18 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { SmoothScroll } from "@/components/providers/smooth-scroll";
 
-const inter = Inter({
+// Self-hosted at build time: no render-blocking request to fonts.googleapis.com.
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
   display: "swap",
+  preload: true,
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+  display: "swap",
+  preload: true,
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Pinch-zoom left enabled: capping it fails WCAG 1.4.4 and hurts low-vision users.
   themeColor: "#1a1a1a",
 };
 
@@ -44,8 +56,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="min-h-screen font-sans antialiased overflow-x-hidden">{children}</body>
+    <html lang="en" className={`${spaceGrotesk.variable} ${instrumentSerif.variable}`}>
+      <head>
+        {/* Warm up the YouTube thumbnail CDN before the sermons section scrolls in. */}
+        <link rel="preconnect" href="https://img.youtube.com" />
+        <link rel="dns-prefetch" href="https://img.youtube.com" />
+      </head>
+      <body className="min-h-screen font-sans antialiased overflow-x-hidden">
+        <SmoothScroll>{children}</SmoothScroll>
+      </body>
     </html>
   );
 }

@@ -32,8 +32,8 @@ const config: Config = {
         ring: "#D85A4A",
       },
       fontFamily: {
-        sans: ["Space Grotesk", "system-ui", "sans-serif"],
-        editorial: ["Instrument Serif", "Georgia", "serif"],
+        sans: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
+        editorial: ["var(--font-instrument-serif)", "Georgia", "serif"],
       },
       borderRadius: {
         lg: "0.5rem",

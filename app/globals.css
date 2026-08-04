@@ -2,7 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+/* Fonts are self-hosted via next/font in app/layout.tsx — no blocking @import here. */
+
+/* Lenis smooth scroll (inlined from lenis/dist/lenis.css to avoid an extra request) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Keep the embedded map draggable. Google's embed needs ctrl+scroll to zoom,
+   so re-enabling this does not trap the page scroll. */
+.lenis.lenis-smooth iframe.map-embed {
+  pointer-events: auto;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
+}
 
 @layer base {
   :root {
@@ -24,13 +58,11 @@
     @apply border-border;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
+  /* No CSS scroll-behavior: Lenis owns scrolling and the two fight each other. */
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
     /* Film grain texture */
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
@@ -42,7 +74,7 @@
 @layer components {
   /* Editorial serif headings */
   .font-editorial {
-    font-family: 'Instrument Serif', Georgia, serif;
+    font-family: var(--font-instrument-serif), Georgia, serif;
     font-style: italic;
   }
 
@@ -151,6 +183,23 @@
     pointer-events: none;
   }
 
+  /* Keeps a control at its designed size while giving it a 44px hit area,
+     so small indicators stay small but remain comfortably tappable. */
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Width is capped by the 14px dot pitch so neighbouring targets never
+       overlap; height expands freely since nothing sits above or below. */
+    width: 16px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+  }
+
   /* Handwritten rotation */
   .rotate-slight {
     transform: rotate(-1.5deg);
@@ -172,9 +221,12 @@
   @apply outline-none ring-2 ring-accent ring-offset-4 ring-offset-background;
 }
 
-/* Custom cursor on interactive elements */
+/* Interactive elements: transition only what actually changes.
+   `transition: all` forces the compositor to watch layout properties too. */
 a, button {
-  @apply transition-all duration-200;
+  transition-property: color, background-color, border-color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Horizontal scroll snap */
@@ -193,12 +245,15 @@ a, button {
     -webkit-tap-highlight-color: transparent;
   }
   
-  /* Better touch targets */
-  button, a {
+  /* Touch targets: expand the *hit area* only.
+     A blanket min-width/min-height here inflates small controls (it was
+     stretching the 8px poster dots to 46px). Use .tap-target instead. */
+  button:not(.tap-target),
+  a:not(.tap-target) {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Prevent horizontal overflow */
   html, body {
     overflow-x: hidden;
@@ -218,5 +273,17 @@ a, button {
 @supports (-webkit-touch-callout: none) {
   html {
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Respect reduced-motion: strip decorative motion, keep the layout identical. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

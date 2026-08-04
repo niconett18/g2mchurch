@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import Image from "next/image";
+import { motion, useScroll, useTransform, useInView, useReducedMotion } from "framer-motion";
 
 const beliefs = [
   { number: "01", title: "Real talk", text: "No perfect people. Just real conversations about faith, doubt, and everything in between." },
@@ -12,6 +13,10 @@ const beliefs = [
 export function About() {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+  const prefersReducedMotion = useReducedMotion();
+  // Drives the marquee only while the section is actually on screen.
+  const marqueeRef = useRef(null);
+  const marqueeVisible = useInView(marqueeRef, { margin: "100px" });
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"]
@@ -65,10 +70,15 @@ export function About() {
               className="relative z-10 max-w-[280px] sm:max-w-none mx-auto sm:mx-0"
             >
               <div className="bg-white p-2 shadow-xl">
-                <div 
-                  className="aspect-[3/4] bg-cover bg-center"
-                  style={{ backgroundImage: `url('/aboutus/about-1.png')` }}
-                />
+                <div className="aspect-[3/4] relative overflow-hidden">
+                  <Image
+                    src="/aboutus/about-1.webp"
+                    alt="G2M Church community gathering"
+                    fill
+                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 45vw, 400px"
+                    className="object-cover"
+                  />
+                </div>
               </div>
             </motion.div>
             <motion.div
@@ -78,10 +88,15 @@ export function About() {
               className="absolute top-16 -right-2 sm:top-20 sm:-right-8 lg:top-40 lg:-right-16 w-2/3 sm:w-3/4 z-20"
             >
               <div className="bg-white p-2 shadow-xl">
-                <div 
-                  className="aspect-square bg-cover bg-center"
-                  style={{ backgroundImage: `url('/aboutus/about-2.png')` }}
-                />
+                <div className="aspect-square relative overflow-hidden">
+                  <Image
+                    src="/aboutus/about-2.webp"
+                    alt="G2M Church members together"
+                    fill
+                    sizes="(max-width: 640px) 210px, (max-width: 1024px) 34vw, 300px"
+                    className="object-cover"
+                  />
+                </div>
               </div>
             </motion.div>
             {/* Handwritten annotation */}
@@ -128,10 +143,13 @@ export function About() {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}
+          ref={marqueeRef}
           className="mt-16 sm:mt-24 md:mt-32 py-6 sm:py-8 border-y-2 border-foreground/10 overflow-hidden"
         >
           <motion.div
-            animate={{ x: [0, -1000] }}
+            animate={
+              marqueeVisible && !prefersReducedMotion ? { x: [0, -1000] } : { x: 0 }
+            }
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             className="flex gap-6 sm:gap-12 whitespace-nowrap"
           >

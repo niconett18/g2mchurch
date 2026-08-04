@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { Play, Youtube, ArrowRight, ExternalLink } from "lucide-react";
 
@@ -113,9 +114,12 @@ export function Sermons() {
             rel="noopener noreferrer"
             className="block relative aspect-video bg-white/5 backdrop-blur-sm border border-white/10 overflow-hidden group"
           >
-            <img 
-              src={`https://img.youtube.com/vi/-XwMt2LlgWk/maxresdefault.jpg`}
+            {/* Routed through next/image: re-encodes the 249KB JPEG to AVIF/WebP. */}
+            <Image
+              src="https://img.youtube.com/vi/-XwMt2LlgWk/maxresdefault.jpg"
               alt="G2M Featured Podcast"
+              fill
+              sizes="(max-width: 1024px) 100vw, 1200px"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
@@ -165,9 +169,14 @@ export function Sermons() {
             >
               {/* Thumbnail */}
               <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
                   alt={video.title}
+                  width={320}
+                  height={180}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full aspect-video object-cover"
                 />
                 <div className="absolute inset-0 bg-foreground/20 group-hover:bg-foreground/10 transition-colors" />

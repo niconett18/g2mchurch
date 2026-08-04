@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Instagram, Youtube, ArrowUp } from "lucide-react";
+import { useSmoothScrollTo } from "@/components/providers/smooth-scroll";
 
 const socialLinks = [
   { name: "Instagram", href: "https://www.instagram.com/g2m_church/", icon: Instagram },
@@ -11,9 +12,8 @@ const socialLinks = [
 ];
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const scrollTo = useSmoothScrollTo();
+  const scrollToTop = () => scrollTo(0);
 
   const currentYear = new Date().getFullYear();
 
@@ -102,6 +102,7 @@ export function Footer() {
 
               {/* Back to top */}
               <motion.button
+                type="button"
                 onClick={scrollToTop}
                 whileHover={{ y: -4 }}
                 className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
@@ -121,9 +122,10 @@ export function Footer() {
             <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
               <div className="relative h-6 w-12 sm:h-8 sm:w-16">
                 <Image
-                  src="/g2m-logo.svg"
+                  src="/g2m-logo.png"
                   alt="G2M Church"
                   fill
+                  sizes="64px"
                   className="object-contain"
                 />
               </div>

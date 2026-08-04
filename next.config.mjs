@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Serve AVIF/WebP where supported; falls back automatically.
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",
@@ -14,8 +16,13 @@ const nextConfig = {
   },
   // Vercel optimizations
   swcMinify: true,
+  poweredByHeader: false,
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
+  },
+  experimental: {
+    // Tree-shake icon/motion barrel files instead of pulling in the whole package.
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
 };
 
