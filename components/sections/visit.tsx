@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: "Young adults scene?",
-    answer: "G2M Collective meets Friday nights. College students + young professionals hanging out, growing, serving. Come find your people.",
+    answer: "G2M Collective meets Friday nights. College students + young professionals connecting, growing, serving. Come find your people.",
   },
 ];
 
